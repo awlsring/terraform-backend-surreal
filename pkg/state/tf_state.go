@@ -21,11 +21,11 @@ type TfState struct {
 	Lineage string `json:"lineage"`
 	Resources []TfResource `json:"resources"`
 	CheckResult *TfCheckResult `json:"check_result"`
-	Output map[string]TfOutput `json:"output"`
+	Outputs map[string]TfOutput `json:"outputs"`
 }
 
 type TfOutput struct {
-	Sensitive bool `json:"sensitive"`
+	Sensitive bool `json:"sensitive,omitempty"`
 	Type string `json:"type"`
 	Value interface{} `json:"value"`
 }
