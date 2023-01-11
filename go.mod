@@ -3,7 +3,7 @@ module github.com/awlsring/terraform-backend-surreal
 go 1.19
 
 require (
-	github.com/awlsring/surreal-db-client v0.0.0
+	github.com/awlsring/surreal-db-client v0.0.2
 	github.com/gin-gonic/gin v1.8.2
 )
 
@@ -46,5 +46,3 @@ require (
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
-
-replace github.com/awlsring/surreal-db-client => /Users/awlsring/Code/SurrealDBClient
