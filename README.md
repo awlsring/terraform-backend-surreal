@@ -20,9 +20,9 @@ users:
   terraform: alligator3
 ```
 
-Port: The port that the backend will listen on
-Surreal: The SurrealDB connection information
-Users: A map of username to password that will be used to authenticate with the backend
+* Port: The port that the backend will listen on
+* Surreal: The SurrealDB connection information
+* Users: A map of username to password that will be used to authenticate with the backend
 
 ### Terraform
 After the server is setup, you can include the backend in your Terraform configuration.
