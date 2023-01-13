@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"strings"
 
 	"github.com/awlsring/surreal-db-client/surreal"
 	"github.com/spf13/viper"
@@ -61,9 +62,8 @@ func LoadConfigMap() (ConfigMap, error) {
 	if user == "" || pass == "" {
 		log.Fatalln("DB_USER and DB_PASSWORD must be set in the environment. (or in the config file)")
 	}
-	config.Surreal.User = user
-	config.Surreal.Password = pass
-	
+	config.Surreal.User = strings.TrimSpace(user)
+	config.Surreal.Password = strings.TrimSpace(pass)
 
 	return config, nil
 }
@@ -88,13 +88,11 @@ func LoadUsersMap() (UserMap, error) {
 
 func LoadConfig() (Config, error) {
 	log.Info("Loading config...")
-
-
 	configMap, err := LoadConfigMap()
 	if err != nil {
 		log.Fatalln(err)
 	}
-	log.Infof("Loaded config: %+v", configMap)
+	log.Infof("Loaded configmap")
 
 	userMap, err := LoadUsersMap()
 	if err != nil {
