@@ -1,6 +1,8 @@
 package config
 
 import (
+	"os"
+
 	"github.com/awlsring/surreal-db-client/surreal"
 	"github.com/spf13/viper"
 )
@@ -11,13 +13,20 @@ type Config struct {
 	Surreal surreal.SurrealConfig `mapstructure:"surreal"`
 }
 
+func getConfigPath() string {
+	path := os.Getenv("CONFIG_PATH")
+	if path != "" {
+		return path
+	}
+
+	return "/config/config.yaml"
+}
+
 func LoadConfig() (Config, error) {
 	vp := viper.New()
+	vp.SetConfigFile(getConfigPath())
 
 	var config Config
-	vp.SetConfigName("config")
-	vp.SetConfigType("yaml")
-	vp.AddConfigPath(".")
 	err := vp.ReadInConfig()
 	if err != nil {
 		return Config{}, err
