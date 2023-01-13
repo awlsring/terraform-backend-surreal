@@ -27,6 +27,10 @@ users:
 ### Terraform
 After the server is setup, you can include the backend in your Terraform configuration.
 
+The uri is a combination of the project name and the stack name. This is so there aren't potential conflicts between stacks across different projects. Locking and unlocking are done on this same uri, so it must be repeated for the `address`, `lock_address`, and `unlock_address` fields.
+
+```hcl
+
 In Terraform...
 ```hcl
 terraform {
@@ -53,15 +57,27 @@ new HttpBackend(this, {
 })
 ```
 
-The uri is a combination of the project name and the stack name. This is so there aren't potential conflicts between stacks across different projects.
+I have also created a [customer cdktf construct](https://github.com/awlsring/cdktf-surreal-backend) that can be used to configure this backend easily. This construct removes the need to specify the project and stack name as part of the address.
+```typescript
+import { SurrealBackend } from "@awlsring/cdktf-surreal-backend"
+
+new SurrealBackend(this, {
+    project: "myproject",
+    stack: "mystack",
+    username: "terraform",
+    password: "alligator3",
+    address: "http://localhost:8032",
+    skipCertVerification: true,
+})
+```
 
 ## Development
 This is still in development. The base functionality is here but there could be some changes introduced in the future depending on needs.
 
 ### Todo List
 - [ ] Add tests
-- [ ] Build and publish container
-- [ ] CDKTF Construct for backend
+- [x] Build and publish container
+- [x] CDKTF Construct for backend
 - [ ] Deployment examples (Kubernetes, Docker, etc.)
 - [ ] More usage examples (Terraform, CDKTF, etc.)
 
