@@ -32,8 +32,12 @@ type UriParams struct {
 
 func Start(cfg *config.Config, dao state.StateDao) {
 	router := gin.Default()
-	router.Use(Authenticator(cfg.Users))
+	router.GET("/", func(c *gin.Context) {
+		c.JSON(200, gin.H{"message": "healthy"})
+	})
+
 	stacks := router.Group("")
+	stacks.Use(Authenticator(cfg.Users))
 
 	stacks.GET("/:project/:stack", func(c *gin.Context) {
 		var params UriParams
