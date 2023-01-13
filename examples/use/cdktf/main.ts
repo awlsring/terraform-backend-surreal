@@ -8,12 +8,12 @@ class MyStack extends TerraformStack {
     super(scope, id);
 
     new HttpBackend(this, {
-      address: "http://localhost:8032/a/a",
-      lockAddress: "http://localhost:8032/a/a",
-      unlockAddress: "http://localhost:8032/a/a",
+      address: "https://tf-backend.awlsring-sea.drigs.org/a/a",
+      lockAddress: "https://tf-backend.awlsring-sea.drigs.org/a/a",
+      unlockAddress: "https://tf-backend.awlsring-sea.drigs.org/a/a",
       username: "admin",
       password: "admin",
-      skipCertVerification: true,
+      skipCertVerification: false,
     })
 
     new TerraformOutput(this, "example", {

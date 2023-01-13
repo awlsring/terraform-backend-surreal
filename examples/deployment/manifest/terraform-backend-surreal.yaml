@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: ConfigMap
+data:
+  config.yaml: |-
+    port: 8032
+    surreal:
+      user: root
+      password: root
+      address: "ws://localhost:8000/rpc"
+      namespace: terraformbackend
+      database: terraformbackend
+    users:
+      admin: admin
+immutable: false
+metadata:
+  name: terraform-backend-surreal-config-c8987f20
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: terraform-backend-surreal-deployment-c8c01064
+spec:
+  minReadySeconds: 0
+  progressDeadlineSeconds: 600
+  replicas: 2
+  selector:
+    matchLabels:
+      cdk8s.io/metadata.addr: terraform-backend-surreal-deployment-c8340134
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        cdk8s.io/metadata.addr: terraform-backend-surreal-deployment-c8340134
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - image: ghcr.io/awlsring/terraform-backend-surreal:latest
+          imagePullPolicy: Always
+          name: main
+          ports:
+            - containerPort: 8032
+          resources:
+            limits:
+              cpu: 1500m
+              memory: 2048Mi
+            requests:
+              cpu: 1000m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+          startupProbe:
+            failureThreshold: 3
+            tcpSocket:
+              port: 8032
+          volumeMounts:
+            - mountPath: /config
+              name: configmap-terraform-backend-surreal-config-c8987f20
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      securityContext:
+        fsGroupChangePolicy: Always
+        runAsNonRoot: true
+      setHostnameAsFQDN: false
+      volumes:
+        - configMap:
+            name: terraform-backend-surreal-config-c8987f20
+          name: configmap-terraform-backend-surreal-config-c8987f20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: terraform-backend-surreal-service-c8183e77
+spec:
+  externalIPs: []
+  ports:
+    - port: 8032
+      targetPort: 8032
+  selector:
+    cdk8s.io/metadata.addr: terraform-backend-surreal-deployment-c8340134
+  type: ClusterIP

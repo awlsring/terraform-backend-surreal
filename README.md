@@ -76,10 +76,8 @@ This is still in development. The base functionality is here but there could be 
 
 ### Todo List
 - [ ] Add tests
-- [x] Build and publish container
-- [x] CDKTF Construct for backend
-- [ ] Deployment examples (Kubernetes, Docker, etc.)
-- [ ] More usage examples (Terraform, CDKTF, etc.)
-
-### Maybe Someday
-- [ ] TLS support
+- [ ] Set server to production mode
+- [X] Build and publish container
+- [X] CDKTF Construct for backend
+- [X] Deployment examples (Kubernetes, Docker, etc.)
+- [X] More usage examples (Terraform, CDKTF, etc.)
