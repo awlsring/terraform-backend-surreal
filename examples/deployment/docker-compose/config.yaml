@@ -1,9 +1,5 @@
 port: 8032
 surreal:
-  user: root
-  password: root
   address: "ws://localhost:8000/rpc"
   namespace: terraformbackend
   database: terraformbackend
-users:
-  admin: admin

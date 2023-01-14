@@ -3,8 +3,12 @@ services:
   backend:
     image: ghcr.io/awlsring/terraform-backend-surreal:latest
     container_name: backend-surreal
+    environment:
+      - DB_USER=user
+      - DB_PASSWORD=password
     volumes:
       - ./config.yaml:/config/config.yaml
+      - ./users.yaml:/config/users.yaml
     ports:
       - 8032:8032
     restart: unless-stopped
