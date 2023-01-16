@@ -10,7 +10,7 @@ type TfResource struct {
 	Mode string `json:"mode"`
 	Type string `json:"type"`
 	Name string `json:"name"`
-	ProviderName string `json:"provider_name"`
+	ProviderName string `json:"provider"`
 	Instances []TfResourceInstance `json:"instances"`
 }
 
