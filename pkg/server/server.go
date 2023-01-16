@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"regexp"
 
 	"github.com/awlsring/terraform-backend-surreal/pkg/config"
 	"github.com/awlsring/terraform-backend-surreal/pkg/state"
@@ -10,6 +11,7 @@ import (
 )
 
 var SYNTAX_VERSION = 4
+var NAME_REGEX = "^[a-zA-Z0-9_]+$"
 
 func Authenticator(users map[string]string) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -30,6 +32,24 @@ type UriParams struct {
 	Stack   string `uri:"stack" binding:"required"`
 }
 
+func GetParams(c *gin.Context) (UriParams, error){
+	var params UriParams
+	if err := c.ShouldBindUri(&params); err != nil {
+		return params, err
+	}
+
+	re := regexp.MustCompile("^[a-zA-Z0-9_]+$")
+	if !re.MatchString(params.Project) {
+		return params, fmt.Errorf("project name must only contain letter, number or '_'. Was: %s", params.Project)
+	}
+
+	if !re.MatchString(params.Stack) {
+		return params, fmt.Errorf("stack name must only contain letter, number or '_'. Was: %s", params.Project)
+	}
+
+	return params, nil
+}
+
 func Start(cfg *config.Config, dao state.StateDao) {
 	router := gin.Default()
 	router.GET("/", func(c *gin.Context) {
@@ -40,8 +60,8 @@ func Start(cfg *config.Config, dao state.StateDao) {
 	stacks.Use(Authenticator(cfg.Users))
 
 	stacks.GET("/:project/:stack", func(c *gin.Context) {
-		var params UriParams
-		if err := c.ShouldBindUri(&params); err != nil {
+		params, err := GetParams(c)
+		if err != nil {
 			c.JSON(400, gin.H{"message": err})
 			return
 		}
@@ -69,8 +89,8 @@ func Start(cfg *config.Config, dao state.StateDao) {
 	})
 
 	stacks.POST("/:project/:stack", func(c *gin.Context) {
-		var params UriParams
-		if err := c.ShouldBindUri(&params); err != nil {
+		params, err := GetParams(c)
+		if err != nil {
 			c.JSON(400, gin.H{"message": err})
 			return
 		}
@@ -103,15 +123,15 @@ func Start(cfg *config.Config, dao state.StateDao) {
 	})
 
 	stacks.DELETE("/:project/:stack", func(c *gin.Context) {
-		var params UriParams
-		if err := c.ShouldBindUri(&params); err != nil {
+		params, err := GetParams(c)
+		if err != nil {
 			c.JSON(400, gin.H{"message": err})
 			return
 		}
 		key := fmt.Sprintf("%s%s", params.Project, params.Stack)
 		log.Infof("Recieved DeleteState request for project - stack: %s-%s", params.Project, params.Stack)
 
-		err := dao.Delete(key)
+		err = dao.Delete(key)
 		if err != nil {
 			log.Error(err)
 			c.JSON(500, gin.H{"error": err.Error()})
@@ -122,8 +142,8 @@ func Start(cfg *config.Config, dao state.StateDao) {
 	})
 
 	stacks.Handle("LOCK", "/:project/:stack", func(c *gin.Context) {
-		var params UriParams
-		if err := c.ShouldBindUri(&params); err != nil {
+		params, err := GetParams(c)
+		if err != nil {
 			c.JSON(400, gin.H{"message": err})
 			return
 		}
@@ -150,8 +170,8 @@ func Start(cfg *config.Config, dao state.StateDao) {
 	})
 
 	stacks.Handle("UNLOCK", "/:project/:stack", func(c *gin.Context) {
-		var params UriParams
-		if err := c.ShouldBindUri(&params); err != nil {
+		params, err := GetParams(c)
+		if err != nil {
 			c.JSON(400, gin.H{"message": err})
 			return
 		}

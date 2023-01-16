@@ -1,7 +1,7 @@
 package state
 
 type TfResourceInstance struct {
-	IndexKey string `json:"index_key,"`
+	IndexKey int `json:"index_key,"`
 	SchemaVersion int `json:"schema_version"`
 	Attributes map[string]interface{} `json:"attributes"`
 }
