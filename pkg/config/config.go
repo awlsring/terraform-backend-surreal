@@ -11,13 +11,13 @@ import (
 )
 
 type Config struct {
-	Port int `mapstructure:"port"`
-	Users map[string]string `mapstructure:"users"`
+	Port    int                   `mapstructure:"port"`
+	Users   map[string]string     `mapstructure:"users"`
 	Surreal surreal.SurrealConfig `mapstructure:"surreal"`
 }
 
 type ConfigMap struct {
-	Port int `mapstructure:"port"`
+	Port    int                   `mapstructure:"port"`
 	Surreal surreal.SurrealConfig `mapstructure:"surreal"`
 }
 
@@ -43,6 +43,25 @@ func getUsersPath() string {
 	return "/config/users.yaml"
 }
 
+func validateSurrealConfig(cfg *surreal.SurrealConfig) {
+	user := cfg.User
+	pass := cfg.Password
+	if user == "" {
+		user = os.Getenv("DB_USER")
+	}
+
+	if pass == "" {
+		pass = os.Getenv("DB_PASSWORD")
+	}
+
+	if user == "" || pass == "" {
+		log.Fatalln("DB_USER and DB_PASSWORD must be set in the environment or in the config file")
+	}
+
+	cfg.User = strings.TrimSpace(user)
+	cfg.Password = strings.TrimSpace(pass)
+}
+
 func LoadConfigMap() (ConfigMap, error) {
 	vp := viper.New()
 	vp.SetConfigFile(getConfigPath())
@@ -56,14 +75,8 @@ func LoadConfigMap() (ConfigMap, error) {
 	if err != nil {
 		return ConfigMap{}, err
 	}
-	
-	user := os.Getenv("DB_USER")
-	pass := os.Getenv("DB_PASSWORD")
-	if user == "" || pass == "" {
-		log.Fatalln("DB_USER and DB_PASSWORD must be set in the environment. (or in the config file)")
-	}
-	config.Surreal.User = strings.TrimSpace(user)
-	config.Surreal.Password = strings.TrimSpace(pass)
+
+	validateSurrealConfig(&config.Surreal)
 
 	return config, nil
 }
@@ -101,8 +114,8 @@ func LoadConfig() (Config, error) {
 	log.Info("Loaded users")
 
 	config := Config{
-		Port: configMap.Port,
-		Users: userMap.Users,
+		Port:    configMap.Port,
+		Users:   userMap.Users,
 		Surreal: configMap.Surreal,
 	}
 
