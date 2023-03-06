@@ -11,14 +11,18 @@ import (
 )
 
 type Config struct {
-	Port    int                   `mapstructure:"port"`
-	Users   map[string]string     `mapstructure:"users"`
-	Surreal surreal.SurrealConfig `mapstructure:"surreal"`
+	Port     int                   `mapstructure:"port"`
+	Users    map[string]string     `mapstructure:"users"`
+	Surreal  surreal.SurrealConfig `mapstructure:"surreal"`
+	LogLevel string                `mapstructure:"logLevel"`
+	Gin      string                `mapstructure:"gin"`
 }
 
 type ConfigMap struct {
-	Port    int                   `mapstructure:"port"`
-	Surreal surreal.SurrealConfig `mapstructure:"surreal"`
+	Port     int                   `mapstructure:"port"`
+	Surreal  surreal.SurrealConfig `mapstructure:"surreal"`
+	LogLevel string                `mapstructure:"logLevel"`
+	Gin      string                `mapstructure:"gin"`
 }
 
 type UserMap struct {
@@ -62,6 +66,20 @@ func validateSurrealConfig(cfg *surreal.SurrealConfig) {
 	cfg.Password = strings.TrimSpace(pass)
 }
 
+func validateConfigMap(cfg *ConfigMap) {
+	if cfg.Port == 0 {
+		cfg.Port = 8080
+	}
+
+	if cfg.LogLevel == "" {
+		cfg.LogLevel = "info"
+	}
+
+	if cfg.Gin == "" {
+		cfg.Gin = "release"
+	}
+}
+
 func LoadConfigMap() (ConfigMap, error) {
 	vp := viper.New()
 	vp.SetConfigFile(getConfigPath())
@@ -76,6 +94,7 @@ func LoadConfigMap() (ConfigMap, error) {
 		return ConfigMap{}, err
 	}
 
+	validateConfigMap(&config)
 	validateSurrealConfig(&config.Surreal)
 
 	return config, nil
@@ -114,9 +133,11 @@ func LoadConfig() (Config, error) {
 	log.Info("Loaded users")
 
 	config := Config{
-		Port:    configMap.Port,
-		Users:   userMap.Users,
-		Surreal: configMap.Surreal,
+		Port:     configMap.Port,
+		Users:    userMap.Users,
+		Surreal:  configMap.Surreal,
+		LogLevel: configMap.LogLevel,
+		Gin:      configMap.Gin,
 	}
 
 	return config, nil

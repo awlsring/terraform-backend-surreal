@@ -32,7 +32,7 @@ type UriParams struct {
 	Stack   string `uri:"stack" binding:"required"`
 }
 
-func GetParams(c *gin.Context) (UriParams, error){
+func GetParams(c *gin.Context) (UriParams, error) {
 	var params UriParams
 	if err := c.ShouldBindUri(&params); err != nil {
 		return params, err
@@ -51,6 +51,15 @@ func GetParams(c *gin.Context) (UriParams, error){
 }
 
 func Start(cfg *config.Config, dao state.StateDao) {
+	level, err := log.ParseLevel(cfg.LogLevel)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	log.SetLevel(level)
+	log.Debug("Debug logging enabled")
+
+	log.Debug("Starting Gin Server in mode: ", cfg.Gin)
+	gin.SetMode(cfg.Gin)
 	router := gin.Default()
 	router.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "healthy"})
@@ -71,7 +80,7 @@ func Start(cfg *config.Config, dao state.StateDao) {
 		entity, err := dao.Read(key)
 		if err != nil {
 			entity = state.Entity{
-				Id:    state.STACK_ID(key),
+				Id: state.STACK_ID(key),
 				State: state.TfState{
 					Version: SYNTAX_VERSION,
 				},
@@ -89,11 +98,13 @@ func Start(cfg *config.Config, dao state.StateDao) {
 	})
 
 	stacks.POST("/:project/:stack", func(c *gin.Context) {
+		log.Debug("Recieved PostState request")
 		params, err := GetParams(c)
 		if err != nil {
 			c.JSON(400, gin.H{"message": err})
 			return
 		}
+
 		key := fmt.Sprintf("%s%s", params.Project, params.Stack)
 		log.Infof("Recieved PostState request for project - stack: %s-%s", params.Project, params.Stack)
 
